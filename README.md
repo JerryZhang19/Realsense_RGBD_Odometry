@@ -1,6 +1,6 @@
-# A simple Visual Odometry system using Intel Realsense D435i
+# A simple Visual Odometry with Intel Depth Camera D435i
 
-Use Optical Flow tracking and g2o optimization.Currently runs at 30-80 fps on i7-9750H
+Use Optical Flow tracking and g2o optimization.Currently runs at 30-60 fps on i7-9750H.
 
 
 ## Related work
