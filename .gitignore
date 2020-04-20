@@ -1,0 +1,7 @@
+data/color/*
+data/depth/*
+data/pose/*
+bin/*
+cmake-build-*
+lib/*
+.idea
