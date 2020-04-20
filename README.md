@@ -1,7 +1,24 @@
-# A Simple Sparse Odometry Based RGBD Reconstruction
+# A simple Visual Odometry system using Intel Realsense D435i
 
-RGBD Sparse Visual Odometry Working now.
-Reconstruction still in progress.
+Use Optical Flow tracking and g2o optimization.Currently runs at 30-80 fps on i7-9750H
+
+
+## Related work
+A simple RGB-D Reconstruction system: https://github.com/JerryZhang19/Simple-RGBD-Reconstruction
+
+It's still in progress and uses similar code structure.
+
+## Future Work
+Add IMU Fusion.
+
+Loop Closure
+
+Mapping Loading 
+
+## Reference
+slambook2 https://github.com/gaoxiang12/slambook2 which gives a great introduction to Visual SLAM.
+
+Code framework inherited from a simple stereo odometry in slambook2.
 
 
 ## DEPENDENCY
@@ -28,19 +45,14 @@ Reconstruction still in progress.
 
 * Pangolin, 
 
-        git clone https://github.com/stevenlovegrove/Pangolin.git
-        cd Pangolin
-        mkdir build
-        cd build
-        cmake ..
-        cmake --build .
+        https://github.com/stevenlovegrove/Pangolin.git
         
 * g2o, 
 
         https://github.com/RainerKuemmerle/g2o
-* pcl,
+        
+* librealsense, 
 
-        sudo apt-get install libpcl-dev pcl-tools
-
+        https://github.com/IntelRealSense/librealsense
        
       
