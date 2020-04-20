@@ -9,11 +9,13 @@ A simple RGB-D Reconstruction system: https://github.com/JerryZhang19/Simple-RGB
 It's still in progress and uses similar code structure.
 
 ## Future Work
+More Documentation on this page.
+
 Add IMU Fusion.
 
 Loop Closure
 
-Mapping Loading 
+Map Loading 
 
 ## Reference
 slambook2 https://github.com/gaoxiang12/slambook2 which gives a great introduction to Visual SLAM.
