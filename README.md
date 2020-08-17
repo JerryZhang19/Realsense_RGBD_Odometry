@@ -7,7 +7,7 @@ It runs at 300 fps on i7-10875H.
 A simple RGB-D Reconstruction system can be found at: https://github.com/JerryZhang19/Simple-RGBD-Reconstruction
 
 
-#Usage
+# Usage
 For live realsense camera tracking, in run_realsense.cpp set vo->SetRealtime(true) .
 Camera intrinsics is loaded from data/calib.txt. By default, 640x480 @60fps is used, and corresponding intrinsics is provided.
 
