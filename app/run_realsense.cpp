@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     simpleslam::VisualOdometry::Ptr vo(
         new simpleslam::VisualOdometry(FLAGS_config_file));
     //vo->SavePose(false);
-    vo->SetRealtime(false);
+    vo->SetRealtime(true);
     assert(vo->Init() == true);
 
     vo->Run();
