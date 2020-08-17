@@ -1,6 +1,6 @@
 //
 // Created by gaoxiang on 19-5-4.
-//
+// modified by jianwei zhang
 #include "myslam/visual_odometry.h"
 #include <chrono>
 #include "myslam/config.h"

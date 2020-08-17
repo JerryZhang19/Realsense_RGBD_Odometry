@@ -1,7 +1,3 @@
-//
-// Created by gaoxiang on 19-5-4.
-// modified by jianwei zhang
-//
 
 #include <gflags/gflags.h>
 #include "myslam/visual_odometry.h"
@@ -13,7 +9,7 @@ int main(int argc, char **argv) {
     simpleslam::VisualOdometry::Ptr vo(
         new simpleslam::VisualOdometry(FLAGS_config_file));
     //vo->SavePose(false);
-    vo->SetRealtime(true);
+    vo->SetRealtime(false);
     assert(vo->Init() == true);
 
     vo->Run();

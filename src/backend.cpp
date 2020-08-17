@@ -1,6 +1,6 @@
 //
 // Created by gaoxiang on 19-5-2.
-//
+// modified and maintained by jianwei zhang
 
 #include "myslam/backend.h"
 #include "myslam/algorithm.h"

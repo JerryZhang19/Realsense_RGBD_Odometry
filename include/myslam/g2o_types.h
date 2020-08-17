@@ -1,6 +1,6 @@
 //
 // Created by gaoxiang on 19-5-4.
-//
+// modified by jianwei zhang
 
 #ifndef MYSLAM_G2O_TYPES_H
 #define MYSLAM_G2O_TYPES_H
