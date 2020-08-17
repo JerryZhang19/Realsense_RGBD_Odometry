@@ -22,6 +22,9 @@
 #include <Eigen/Geometry>
 
 
+//#define TEST_PERFORMANCE          //to test time consumption , uncomment this line t
+#define TIMING_INFO_INTERVAL (50)   //moving average window size
+
 
 // typedefs for eigen
 // double matricies
@@ -110,7 +113,7 @@ typedef Sophus::SO3d SO3;
 
 // for cv
 #include <opencv2/core/core.hpp>
-
+#include <opencv2/opencv.hpp>
 using cv::Mat;
 
 // glog

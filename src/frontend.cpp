@@ -49,8 +49,21 @@ bool Frontend::Track() {
         current_frame_->SetPose(relative_motion_ * last_frame_->Pose());
     }
 
+#ifdef TEST_PERFORMANCE
+    auto t0 = std::chrono::steady_clock::now();
+#endif
+
     int num_track_last = TrackLastFrame();
+
+#ifdef TEST_PERFORMANCE
+    auto t1 = std::chrono::steady_clock::now();
+#endif
+
     tracking_inliers_ = EstimateCurrentPose();
+
+#ifdef TEST_PERFORMANCE
+    auto t2 = std::chrono::steady_clock::now();
+#endif
 
     if (tracking_inliers_ > num_features_tracking_) {
         // tracking good
@@ -63,10 +76,52 @@ bool Frontend::Track() {
         status_ = FrontendStatus::LOST;
     }
 
+#ifdef TEST_PERFORMANCE
+    auto t3 = std::chrono::steady_clock::now();
+#endif
+
     InsertKeyframe();
+
+
+#ifdef TEST_PERFORMANCE
+    auto t4 = std::chrono::steady_clock::now();
+#endif
+
     relative_motion_ = current_frame_->Pose() * last_frame_->Pose().inverse();
 
+#ifdef TEST_PERFORMANCE
+    auto t5 = std::chrono::steady_clock::now();
+
     if (viewer_) viewer_->AddCurrentFrame(current_frame_);
+
+    auto t6 = std::chrono::steady_clock::now();
+    internal_counter_++;
+    timer1 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+    timer2 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+    timer3 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t3 - t2).count();
+    timer4 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t4 - t3).count();
+    timer5 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t5 - t4).count();
+    timer6 +=  std::chrono::duration_cast<std::chrono::duration<double>>(t6 - t5).count();
+    if(internal_counter_%TIMING_INFO_INTERVAL==0) {
+        LOG(INFO)<<"optical flow took               "<<timer1*1000/TIMING_INFO_INTERVAL<<'ms';
+        LOG(INFO)<<"estimate current pose took      "<<timer2*1000/TIMING_INFO_INTERVAL<<"ms";
+        //LOG(INFO)<<"insert keyframe took            "<<timer4*1000/TIMING_INFO_INTERVAL<<"ms";
+        //LOG(INFO)<<"viewer took                     "<<timer6/TIMING_INFO_INTERVAL;
+
+        timer1=0;
+        timer2=0;
+        timer3=0;
+        timer4=0;
+        timer5=0;
+        timer6=0;
+    }
+
+#endif
+
+#ifndef TEST_PERFORMANCE
+    if (viewer_) viewer_->AddCurrentFrame(current_frame_);
+#endif
+
     return true;
 }
 
@@ -79,8 +134,8 @@ bool Frontend::InsertKeyframe() {
     current_frame_->SetKeyFrame();
     map_->InsertKeyFrame(current_frame_);
 
-    LOG(INFO) << "Set frame " << current_frame_->id_ << " as keyframe "
-              << current_frame_->keyframe_id_;
+    //LOG(INFO) << "Set frame " << current_frame_->id_ << " as keyframe "
+    //          << current_frame_->keyframe_id_;
 
     SetObservationsForKeyFrame();
     DetectFeatures();  // detect new features
@@ -123,7 +178,7 @@ int Frontend::InitializeNewPoints()  {
             cnt_triangulated_pts++;
         }
     }
-    LOG(INFO) << "new landmarks: " << cnt_triangulated_pts;
+    //LOG(INFO) << "new landmarks: " << cnt_triangulated_pts;
     return cnt_triangulated_pts;
 }
 
@@ -171,7 +226,7 @@ int Frontend::EstimateCurrentPose() {
     }
 
     // estimate the Pose the determine the outliers
-    const double chi2_th = 80;
+    const double chi2_th = 100;
     int cnt_outlier = 0;
     for (int iteration = 0; iteration < 4; ++iteration) {
         vertex_pose->setEstimate(current_frame_->Pose());
@@ -290,10 +345,12 @@ int Frontend::DetectFeatures() {
     cv::Mat mask(current_frame_->img_.size(), CV_8UC1, 255);
     for (auto &feat : current_frame_->features_) {
         cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10),
-                      feat->position_.pt + cv::Point2f(10, 10), 0, CV_FILLED);
+                      feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED);
     }
 
     std::vector<cv::KeyPoint> keypoints;
+
+
     gftt_->detect(current_frame_->img_, keypoints, mask);
     int cnt_detected = 0;
     for (auto &kp : keypoints) {
@@ -312,70 +369,16 @@ int Frontend::DetectFeatures() {
     return cnt_detected;
 }
 
-/*
-int Frontend::FindFeaturesInRight() {
-    // use LK flow to estimate points in the right image
-    std::vector<cv::Point2f> kps_left, kps_right;
-    for (auto &kp : current_frame_->features_left_) {
-        kps_left.push_back(kp->position_.pt);
-        auto mp = kp->map_point_.lock();
-        if (mp) {
-            // use projected points as initial guess
-            auto px =
-                camera_right_->world2pixel(mp->pos_, current_frame_->Pose());
-            kps_right.push_back(cv::Point2f(px[0], px[1]));
-        } else {
-            // use same pixel in left iamge
-            kps_right.push_back(kp->position_.pt);
-        }
-    }
 
-    std::vector<uchar> status;
-    Mat error;
-    cv::calcOpticalFlowPyrLK(
-        current_frame_->left_img_, current_frame_->right_img_, kps_left,
-        kps_right, status, error, cv::Size(11, 11), 3,
-        cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,
-                         0.01),
-        cv::OPTFLOW_USE_INITIAL_FLOW);
-
-    int num_good_pts = 0;
-    for (size_t i = 0; i < status.size(); ++i) {
-        if (status[i]) {
-            cv::KeyPoint kp(kps_right[i], 7);
-            Feature::Ptr feat(new Feature(current_frame_, kp));
-            feat->is_on_left_image_ = false;
-            current_frame_->features_right_.push_back(feat);
-            num_good_pts++;
-        } else {
-            current_frame_->features_right_.push_back(nullptr);
-        }
-    }
-    LOG(INFO) << "Find " << num_good_pts << " in the right image.";
-    return num_good_pts;
-}
-*/
 
 bool Frontend::BuildInitMap() {
     //SE3 pose= camera_->pose();
     size_t cnt_init_landmarks = 0;
     for (size_t i = 0; i < current_frame_->features_.size(); ++i) {
-        //if (current_frame_->features_right_[i] == nullptr) continue;
-        // create map point from triangulation
-        /*
-        std::vector<Vec3> points{
-            camera_left_->pixel2camera(
-                Vec2(current_frame_->features_left_[i]->position_.pt.x,
-                     current_frame_->features_left_[i]->position_.pt.y)),
-            camera_right_->pixel2camera(
-                Vec2(current_frame_->features_right_[i]->position_.pt.x,
-                     current_frame_->features_right_[i]->position_.pt.y))};
-        */
         Vec3 pworld = camera_->pixel2world(Vec2(current_frame_->features_[i]->position_.pt.x,
                 current_frame_->features_[i]->position_.pt.y),
                 camera_->pose_,// Identity SE3
                 current_frame_->features_[i]->init_depth_); // use depth sensor only to init
-        //std::cout<<"pworld:"<<pworld<<std::endl;
 
         auto new_map_point = MapPoint::CreateNewMappoint();
         new_map_point->SetPos(pworld);

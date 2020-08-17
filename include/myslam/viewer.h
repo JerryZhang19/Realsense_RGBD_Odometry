@@ -56,7 +56,8 @@ class Viewer {
     std::unordered_map<unsigned long, MapPoint::Ptr> active_landmarks_;
     bool map_updated_ = false;
 
-    std::mutex viewer_data_mutex_;
+    std::mutex viewer_map_data_mutex_;
+    std::mutex viewer_frame_data_mutex_;
 };
 }  // namespace myslam
 

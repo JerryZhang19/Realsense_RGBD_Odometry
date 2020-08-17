@@ -133,6 +133,17 @@ class Frontend {
 
     // utilities
     cv::Ptr<cv::GFTTDetector> gftt_;  // feature detector in opencv
+
+#ifdef TEST_PERFORMANCE
+    // For performance testing only
+    double timer1=0;
+    double timer2=0;
+    double timer3=0;
+    double timer4=0;
+    double timer5=0;
+    double timer6=0;
+#endif
+    int internal_counter_= 0;
 };
 
 }  // namespace myslam

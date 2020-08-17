@@ -20,12 +20,12 @@ void Viewer::Close() {
 }
 
 void Viewer::AddCurrentFrame(Frame::Ptr current_frame) {
-    std::unique_lock<std::mutex> lck(viewer_data_mutex_);
+    std::unique_lock<std::mutex> lck(viewer_frame_data_mutex_);
     current_frame_ = current_frame;
 }
 
 void Viewer::UpdateMap() {
-    std::unique_lock<std::mutex> lck(viewer_data_mutex_);
+    std::unique_lock<std::mutex> lck(viewer_map_data_mutex_);
     assert(map_ != nullptr);
     active_keyframes_ = map_->GetActiveKeyFrames();
     active_landmarks_ = map_->GetActiveMapPoints();
@@ -56,7 +56,7 @@ void Viewer::ThreadLoop() {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         vis_display.Activate(vis_camera);
 
-        std::unique_lock<std::mutex> lock(viewer_data_mutex_);
+        viewer_frame_data_mutex_.lock();
         if (current_frame_) {
             DrawFrame(current_frame_, green);
             FollowCurrentFrame(vis_camera);
@@ -65,10 +65,13 @@ void Viewer::ThreadLoop() {
             cv::imshow("image", img);
             cv::waitKey(1);
         }
+        viewer_frame_data_mutex_.unlock();
 
+        viewer_map_data_mutex_.lock();
         if (map_) {
             DrawMapPoints();
         }
+        viewer_map_data_mutex_.unlock();
 
         pangolin::FinishFrame();
         usleep(5000);
@@ -79,7 +82,7 @@ void Viewer::ThreadLoop() {
 
 cv::Mat Viewer::PlotFrameImage() {
     cv::Mat img_out;
-    cv::cvtColor(current_frame_->img_, img_out, CV_GRAY2BGR);
+    cv::cvtColor(current_frame_->img_, img_out, cv::COLOR_GRAY2BGR);
     for (size_t i = 0; i < current_frame_->features_.size(); ++i) {
         if (current_frame_->features_[i]->map_point_.lock()) {
             auto feat = current_frame_->features_[i];

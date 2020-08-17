@@ -52,6 +52,8 @@ Frame::Ptr IO::NextFrame() {
     auto new_frame = Frame::CreateFrame();
     if(realtime_)
     {
+        boost::format debug_fmt("%s/debug/%05d.png");
+
         rs2::frameset frameset = pipe_->wait_for_frames();
         frameset = align_to_color_->process(frameset);
         auto depth = frameset.get_depth_frame();
@@ -64,6 +66,8 @@ Frame::Ptr IO::NextFrame() {
 
         new_frame->img_ = cv_gray;
         new_frame->depth_ = cv_depth;
+
+        cv::imwrite((debug_fmt % dataset_path_  % current_image_index_).str(),cv_color);
     }
     else{
         boost::format img_fmt("%s/color/%05d.png");

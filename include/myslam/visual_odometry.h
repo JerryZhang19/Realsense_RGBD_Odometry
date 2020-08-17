@@ -59,12 +59,14 @@ private:
     // dataset
     IO::Ptr io_ = nullptr;
 
-    //mapping related
-    //Mapping::Ptr mapping_ = nullptr;
-
+#ifdef TEST_PERFORMANCE
+    // For performance testing only
     double timer1=0;
     double timer2=0;
     double timer3=0;
+
+#endif
+
 };
 }  // namespace myslam
 

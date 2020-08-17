@@ -1,21 +1,27 @@
 # A simple Visual Odometry with Intel Depth Camera D435i
 
-Use Optical Flow tracking and g2o optimization.Currently runs at 30-60 fps on i7-9750H.
+The visual frontend uses optical flow tracking. Backend optimization is implemented in g2o.
+
+It runs at 300 fps on i7-10875H.
+
+A simple RGB-D Reconstruction system can be found at: https://github.com/JerryZhang19/Simple-RGBD-Reconstruction
 
 
-## Related work
-A simple RGB-D Reconstruction system: https://github.com/JerryZhang19/Simple-RGBD-Reconstruction
+#Usage
+For live realsense camera tracking, in run_realsense.cpp set vo->SetRealtime(true) .
+Camera intrinsics is loaded from data/calib.txt. By default, 640x480 @60fps is used, and corresponding intrinsics is provided.
 
-It's still in progress and uses similar code structure.
+For pre-recorded RGB-D videos, set vo->SetRealtime(false) .
+Please place RGB image in data/color, and place depth image in data/depth. Image format is 00000.png,00001.png.
 
-## Future Work
-More Documentation on this page.
+You can enable timing test by uncommenting #define TEST_PERFORMANCE in common_include.h
 
-Add IMU Fusion.
+## Limitations and potential for extension
+Loop Closure: A BoW visual loop closure detection can be integrated into the system. To this end, repeatable corners (FAST,SIFT) should be detected and descriptors should be computed. A pose graph will be needed in the system to perform global pose graph optimization.
 
-Loop Closure
+For better accuracy, structures that enable mid-term data association like Covisibility Graph introduced in ORB-SLAM could be added.
 
-Map Loading 
+For IMU fusion, methods introduced in VINS-MONO could be integrated.
 
 ## Reference
 slambook2 https://github.com/gaoxiang12/slambook2 which gives a great introduction to Visual SLAM.
@@ -44,6 +50,8 @@ Code framework inherited from a simple stereo odometry in slambook2.
 * Boost,
 
         sudo apt-get install libboost-dev libboost-filesystem-dev
+        
+* OpenCV 3 or OpenCV 4
 
 * Pangolin, 
 
