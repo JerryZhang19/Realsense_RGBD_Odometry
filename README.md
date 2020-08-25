@@ -13,6 +13,8 @@ Camera intrinsics is loaded from data/calib.txt. By default, 640x480 @60fps is u
 
 For pre-recorded RGB-D videos, set vo->SetRealtime(false) .
 Please place RGB image in data/color, and place depth image in data/depth. Image format is 00000.png,00001.png.
+You can download a sample dataset from [google drive](https://drive.google.com/file/d/1sRiMUDsCblOJvfsJIYqycoguT74RjG8h/view?usp=sharing) or
+change dataset directory in config/default.yaml.
 
 You can enable timing test by uncommenting #define TEST_PERFORMANCE in common_include.h
 
